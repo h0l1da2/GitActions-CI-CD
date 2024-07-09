@@ -1,0 +1,62 @@
+name: Java CI with Gradle
+
+# master branch 에 push / PR 이 일어날 때를 트리거로 하여 해당 build event 발생
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  # 작업 이름 build 정의
+  build:
+
+    # ubuntu 최신 이미지 위에서 실행
+    runs-on: ubuntu-latest
+    # 깃허브의 해당 작업에 대한 권한 범위
+    permissions:
+      # 해당 커밋에 대한 "읽기" 권한 있음.
+      contents: read
+
+    # 빌드 작업의 단계들.. '-' 가 Step 1, 2, 3 으로 관리될거임
+    steps:
+      # 레포로 체크아웃
+      - uses: actions/checkout@v4
+      # jdk 17 세팅 작업이라고 이름을 지정하고, uses 를 사용해 setup-java 함
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          # 궁금해서 찾아봤는데 JDK 이미지가 저장된 저장소 이름임..
+          distribution: 'temurin'
+
+      # Gradle 세팅, 아래 링크에 액션의 자세한 내용이 담겨있다.
+      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+
+      # build 명령
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+
+  # 작업 이름 dependency-submission 정의
+  dependency-submission:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 종속성 그래프를 받는 작업이라는데, 해당 종속성의 보고된 취약점에 대해 알림을 받을 수 있다고...자세한 건 아래 README.md 참고.
+      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
+      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
