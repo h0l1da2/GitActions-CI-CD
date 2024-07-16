@@ -1,12 +1,15 @@
 name: Deploy to EC2 using Ansible
 
 on:
-  repository_dispatch:
-    types: [ trigger-cd ]
+  workflow_run:
+    workflows: [ Java CI with Gradle ]
+    types:
+      - completed
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
 
