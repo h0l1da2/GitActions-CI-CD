@@ -63,16 +63,22 @@ jobs:
           path: build/libs
       - run: ls -R build/libs
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Copy artifact to EC2
+      - name: Upload artifact to EC2
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa build/libs ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/my-project
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa build/libs/*.jar $EC2_USER@$EC2_HOST:/my-project
 
       - name: Run Ansible playbook
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'ansible-playbook /path/to/your/playbook.yml'
+          ansible-playbook -i "$EC2_HOST," -u $EC2_USER --private-key ~/.ssh/id_rsa /my-project/ansible.yml
 
