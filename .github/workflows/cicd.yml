@@ -73,7 +73,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          scp -o StrictHostKeyChecking=no build/libs/cicd-0.0.1-SNAPSHOT.jar $EC2_USER@$EC2_HOST:/my-project
+          scp -o StrictHostKeyChecking=no build/libs/*.jar $EC2_USER@$EC2_HOST:/my-project
 
       - name: Run Ansible playbook
         env:
