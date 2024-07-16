@@ -1,8 +1,8 @@
-name: Deploy to EC2 using Ansible
+name: CD
 
 on:
   workflow_run:
-    workflows: [ Java CI with Gradle ]
+    workflows: [ "CI" ]
     types:
       - completed
 
