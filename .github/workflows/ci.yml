@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: CI
 
 # master branch 에 push / PR 이 일어날 때를 트리거로 하여 해당 build event 발생
 on:
@@ -45,16 +45,3 @@ jobs:
         with:
           name: Package
           path: build/libs
-
-  # 작업 이름 trigger-deploy 정의
-  trigger-deploy:
-    runs-on: ubuntu-latest
-    needs: [ build ]
-
-    steps:
-      - name: Trigger CD workflow
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: trigger-cd
-
