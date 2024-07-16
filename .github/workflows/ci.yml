@@ -3,9 +3,9 @@ name: Java CI with Gradle
 # master branch 에 push / PR 이 일어날 때를 트리거로 하여 해당 build event 발생
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
 jobs:
   # 작업 이름 build 정의
