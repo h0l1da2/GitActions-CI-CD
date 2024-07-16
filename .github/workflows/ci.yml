@@ -5,7 +5,7 @@ on:
   push:
     branches: [ "develop" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "master" ]
 
 jobs:
   # 작업 이름 build 정의
