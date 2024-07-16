@@ -73,7 +73,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          scp -o StrictHostKeyChecking=no build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:/my-project
+          scp -o StrictHostKeyChecking=no build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:/
 
       - name: Run Ansible playbook
         env:
