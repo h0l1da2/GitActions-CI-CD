@@ -20,8 +20,9 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Package
-          path: build/libs
+          name: artifact
+          path: build/libs/cicd-0.0.1-SNAPSHOT.jar
+      - run: ls -R build/libs/cicd-0.0.1-SNAPSHOT.jar
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
