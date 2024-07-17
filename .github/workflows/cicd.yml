@@ -63,6 +63,7 @@ jobs:
           path: build/libs
       - run: ls -R build/libs
 
+      # 이거 ssh 접속 방법만 고치면 될듯..
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
@@ -73,7 +74,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          scp -o StrictHostKeyChecking=no build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:/
+          scp build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:/my-project
 
       - name: Run Ansible playbook
         env:
