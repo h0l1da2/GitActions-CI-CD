@@ -73,7 +73,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:/my-project
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:~/my-project
 
       - name: Run Ansible playbook
         env:
@@ -81,5 +81,5 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          ansible-playbook -i "$EC2_HOST," -u $EC2_USER --private-key ~/.ssh/id_rsa /my-project/ansible.yml
+          ansible-playbook -i "$EC2_HOST," -u $EC2_USER --private-key ~/.ssh/id_rsa ~/my-project/ansible.yml
 
