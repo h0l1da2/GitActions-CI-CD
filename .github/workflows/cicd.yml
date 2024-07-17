@@ -103,4 +103,4 @@ jobs:
             process_total_time=$((process_finished_at - process_started_at))
             
             echo "Docker build Complete in ${image_build_time} seconds."
-            echo "Docker Process Complete in $(($process_total_time % 60)) seconds."
+            echo "Docker Process Complete in ${process_total_time} seconds."
