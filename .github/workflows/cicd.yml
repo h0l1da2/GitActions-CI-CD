@@ -96,11 +96,11 @@ jobs:
             build_finished_at=(date +%s)
             
             docker stop cicd_app
-            docker run -d --name cicd_app -p 8000:8000 cicd_app:${{ env.VERSION }}
+            docker run -d --rm --name cicd_app -p 8000:8000 cicd_app:${{ env.VERSION }}
             
             process_finished_at=(date +%s)
             image_build_time=$((build_finished_at - process_started_at))
             process_total_time=$((process_finished_at - process_started_at))
             
             echo "Docker build Complete in ${image_build_time} seconds."
-            echo "Docker Process Complete in ${process_total_time} seconds."
+            echo "Docker Process Complete in $(($process_total_time % 60)) seconds."
