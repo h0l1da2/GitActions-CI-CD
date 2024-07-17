@@ -74,11 +74,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:~/my-project
 
-      - name: Deploy Artifact
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Extract version
         env:
           MAIN_VERSION: v1.0.
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: echo "VERSION=$MAIN_VERSION$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+
+      - name: Deploy Artifact
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -86,7 +89,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
         # GITHUB_RUN_NUMBER -> 리포지토리에 있는 특정 워크플로의 실행마다 고유한 숫자입니다. 이 숫자는 워크플로의 첫 실행 시 1부터 시작하며 새 실행마다 증가합니다. 워크플로 실행을 다시 실행하는 경우 이 숫자는 변경되지 않습니다.(예시: 3)
           script: |
-            echo $GITHUB_RUN_NUMBER >> asdf.yml
-            docker build -t cicd_app:$MAIN_VERSION$GITHUB_RUN_NUMBER ~/my-project/.
+            docker build -t cicd_app:${{ env.VERSION }} ~/my-project/.
             docker stop cicd_app
-            docker run -d --name cicd_app -p 8000:8000 cicd_app:$MAIN_VERSION$GITHUB_RUN_NUMBER
+            docker run -d --name cicd_app -p 8000:8000 cicd_app:${{ env.VERSION }}
