@@ -93,12 +93,12 @@ jobs:
             
             echo "Start Build Docker Image"
             docker build -t cicd_app:${{ env.VERSION }} ~/my-project/.
-            build_finished_at=(date +%s)
+            build_finished_at=$(date +%s)
             
             docker stop cicd_app
             docker run -d --rm --name cicd_app -p 8000:8000 cicd_app:${{ env.VERSION }}
             
-            process_finished_at=(date +%s)
+            process_finished_at=$(date +%s)
             image_build_time=$((build_finished_at - process_started_at))
             process_total_time=$((process_finished_at - process_started_at))
             
