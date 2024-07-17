@@ -91,15 +91,12 @@ jobs:
           script: |
             process_started_at=$(date +%s)
             
-            set -e
             echo "Start Build Docker Image"
             docker build -t cicd_app:${{ env.VERSION }} ~/my-project/.
             build_finished_at=$(date +%s)
-#            set +e
             
             docker stop cicd_app
 
-#            set -e
             docker run -d --rm --name cicd_app -p 8000:8000 cicd_app:${{ env.VERSION }}
             
             process_finished_at=$(date +%s)
