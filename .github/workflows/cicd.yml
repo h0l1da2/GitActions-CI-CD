@@ -47,9 +47,11 @@ jobs:
           path: build/libs/*.jar
 
   deploy:
+    # 병렬 작업 ㄴㄴ 직렬로 build 작업이 끝나야지만 배포하고 싶음.
     needs: build
 
     runs-on: ubuntu-latest
+    # 쓰기 작업 허용
     permissions:
       contents: write
 
@@ -57,12 +59,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # 아까 업로드했던 아티팩트 다운로드해줌.
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: build/libs
       - run: ls -R build/libs
 
+      # 아티팩트 EC2 로 업로드하기
       - name: Upload to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -74,12 +78,15 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa build/libs/artifact/*.jar $EC2_USER@$EC2_HOST:~/my-project
 
+      # 버전 만들어주기
       - name: Extract version
         env:
           MAIN_VERSION: v1.0.
+          # GITHUB_RUN_NUMBER -> 리포지토리에 있는 특정 워크플로의 실행마다 고유한 숫자입니다. 이 숫자는 워크플로의 첫 실행 시 1부터 시작하며 새 실행마다 증가합니다. 워크플로 실행을 다시 실행하는 경우 이 숫자는 변경되지 않습니다.(예시: 3)
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: echo "VERSION=$MAIN_VERSION$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
 
+      # 이미지 빌드 & 컨테이너 배포
       - name: Deploy Artifact
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -87,21 +94,20 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-        # GITHUB_RUN_NUMBER -> 리포지토리에 있는 특정 워크플로의 실행마다 고유한 숫자입니다. 이 숫자는 워크플로의 첫 실행 시 1부터 시작하며 새 실행마다 증가합니다. 워크플로 실행을 다시 실행하는 경우 이 숫자는 변경되지 않습니다.(예시: 3)
           script: |
-            process_started_at=$(date +%s)
+            process_started_at=$(date +%s%N)
         
             echo "Start Build Docker Image"
             docker build -t cicd_app:${{ env.VERSION }} ~/my-project/.
-            build_finished_at=$(date +%s)
+            build_finished_at=$(date +%s%N)
             
             docker stop cicd_app
 
             docker run -d --name cicd_app -p 8000:8000 cicd_app:${{ env.VERSION }}
             
-            process_finished_at=$(date +%s)
-            image_build_time=$((build_finished_at - process_started_at))
-            process_total_time=$((process_finished_at - process_started_at))
+            process_finished_at=$(date +%s%N)
+            image_build_time=$(echo "scale=3; ($build_finished_at - $process_started_at) / 1000000000" | bc)
+            process_total_time=$(echo "scale=3; ($process_finished_at - $process_started_at) / 1000000000" | bc)
             
             echo "Docker build Complete in ${image_build_time} seconds."
             echo "Docker Process Complete in ${process_total_time} seconds."
